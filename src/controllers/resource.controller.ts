@@ -23,7 +23,8 @@ import {ResourceRepository} from '../repositories';
 
 // ---------- ADD IMPORTS -------------
 import {authenticate} from '@loopback/authentication';
-
+import {inject} from '@loopback/core';
+import {ResourceserviceService} from "../services/resource.service";
 
 
 @authenticate('jwt') // <---- Apply the @authenticate decorator at the class level
@@ -32,7 +33,68 @@ export class ResourceController {
   constructor(
     @repository(ResourceRepository)
     public resourceRepository: ResourceRepository,
+
+    @inject("services.ResourceserviceService") public resourceService: ResourceserviceService
+
   ) { }
+
+
+
+  // ..............................................ResourceCount...................................................
+
+  @get('/resources/count')
+  @response(200, {
+    description: 'Resource model count',
+    content: {'application/json': {schema: CountSchema}},
+  })
+  async count(
+    @param.where(Resource) where?: Where<Resource>,
+  ): Promise<Count> {
+    return this.resourceService.resourceCount(where)
+  }
+
+
+
+  // ..............................................ResourceGet..................................................
+
+
+  @get('/resources')
+  @response(200, {
+    description: 'Array of Resource model instances',
+    content: {
+      'application/json': {
+        schema: {
+          type: 'array',
+          items: getModelSchemaRef(Resource, {includeRelations: true}),
+        },
+      },
+    },
+  })
+  async find(
+    @param.filter(Resource) filter?: Filter<Resource>,
+  ): Promise<Resource[]> {
+    return this.resourceService.resourceGet(filter);
+  }
+
+  // ..............................................ResourceGet..................................................
+  @get('/resources/{id}')
+  @response(200, {
+    description: 'Resource model instance',
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(Resource, {includeRelations: true}),
+      },
+    },
+  })
+  async findById(
+    @param.path.string('id') id: string,
+    @param.filter(Resource, {exclude: 'where'}) filter?: FilterExcludingWhere<Resource>
+  ): Promise<Resource> {
+    return this.resourceService.resourceGetById(id, filter);
+  }
+
+  // ..............................................ResourcePost..................................................
+
 
   @post('/resources')
   @response(200, {
@@ -52,37 +114,27 @@ export class ResourceController {
     })
     resource: Omit<Resource, 'id'>,
   ): Promise<Resource> {
-    return this.resourceRepository.create(resource);
+    return this.resourceService.resourcePost(resource);
   }
 
-  @get('/resources/count')
-  @response(200, {
-    description: 'Resource model count',
-    content: {'application/json': {schema: CountSchema}},
+  // .............................................ResourcePut................................................
+
+
+  @put('/resources/{id}')
+  @response(204, {
+    description: 'Resource PUT success',
   })
-  async count(
-    @param.where(Resource) where?: Where<Resource>,
-  ): Promise<Count> {
-    return this.resourceRepository.count(where);
+  async replaceById(
+    @param.path.string('id') id: string,
+    @requestBody() resource: Resource,
+  ): Promise<void> {
+    await this.resourceService.resourcePut(id, resource);
   }
 
-  @get('/resources')
-  @response(200, {
-    description: 'Array of Resource model instances',
-    content: {
-      'application/json': {
-        schema: {
-          type: 'array',
-          items: getModelSchemaRef(Resource, {includeRelations: true}),
-        },
-      },
-    },
-  })
-  async find(
-    @param.filter(Resource) filter?: Filter<Resource>,
-  ): Promise<Resource[]> {
-    return this.resourceRepository.find(filter);
-  }
+
+
+
+  // .............................................ResourcePatch................................................
 
   @patch('/resources')
   @response(200, {
@@ -100,24 +152,10 @@ export class ResourceController {
     resource: Resource,
     @param.where(Resource) where?: Where<Resource>,
   ): Promise<Count> {
-    return this.resourceRepository.updateAll(resource, where);
+    return this.resourceService.resourcePatch(resource, where);
   }
 
-  @get('/resources/{id}')
-  @response(200, {
-    description: 'Resource model instance',
-    content: {
-      'application/json': {
-        schema: getModelSchemaRef(Resource, {includeRelations: true}),
-      },
-    },
-  })
-  async findById(
-    @param.path.string('id') id: string,
-    @param.filter(Resource, {exclude: 'where'}) filter?: FilterExcludingWhere<Resource>
-  ): Promise<Resource> {
-    return this.resourceRepository.findById(id, filter);
-  }
+  // .............................................ResourcePatchById..........................................
 
   @patch('/resources/{id}')
   @response(204, {
@@ -137,22 +175,22 @@ export class ResourceController {
     await this.resourceRepository.updateById(id, resource);
   }
 
-  @put('/resources/{id}')
-  @response(204, {
-    description: 'Resource PUT success',
-  })
-  async replaceById(
-    @param.path.string('id') id: string,
-    @requestBody() resource: Resource,
-  ): Promise<void> {
-    await this.resourceRepository.replaceById(id, resource);
-  }
+
+  // .............................................ResourcePatchById..........................................
 
   @del('/resources/{id}')
   @response(204, {
     description: 'Resource DELETE success',
   })
   async deleteById(@param.path.string('id') id: string): Promise<void> {
-    await this.resourceRepository.deleteById(id);
+    await this.resourceService.resourceDeleteById(id);
   }
+
+
+
+
+
+
+
+
 }

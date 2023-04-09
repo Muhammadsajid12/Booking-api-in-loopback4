@@ -7,30 +7,100 @@ import {
   Where,
 } from '@loopback/repository';
 import {
-  post,
-  param,
+  del,
   get,
   getModelSchemaRef,
+  param,
   patch,
+  post,
   put,
-  del,
   requestBody,
   response,
 } from '@loopback/rest';
 import {ResourceType} from '../models';
 import {ResourceTypeRepository} from '../repositories';
 // ---------- ADD IMPORTS -------------
-import {authenticate} from '@loopback/authentication';
+// import {authenticate} from '@loopback/authentication';
+import {inject} from '@loopback/core';
+import {ResourceTypeService} from '../services';
 
 
 
-@authenticate('jwt') // <---- Apply the @authenticate decorator at the class level
+// @authenticate('jwt') // <---- Apply the @authenticate decorator at the class level
 
 export class ResourceTypeController {
   constructor(
     @repository(ResourceTypeRepository)
     public resourceTypeRepository: ResourceTypeRepository,
+
+    @inject("services.ResourceTypeService") public resourceTypeService: ResourceTypeService
+
   ) { }
+
+
+
+
+  //...................................... CountMethods......................................................
+
+  @get('/resource-types/count')
+  @response(200, {
+    description: 'ResourceType model count',
+    content: {'application/json': {schema: CountSchema}},
+  })
+  async count(
+    @param.where(ResourceType) where?: Where<ResourceType>,
+  ): Promise<Count> {
+    console.log('count fn called.......');
+    return this.resourceTypeService.resourceTypeCount(where);
+  }
+
+
+
+  //...................................... GetAllResourceTypes................................................
+
+  @get('/resource-types')
+  @response(200, {
+    description: 'Array of ResourceType model instances',
+    content: {
+      'application/json': {
+        schema: {
+          type: 'array',
+          items: getModelSchemaRef(ResourceType, {includeRelations: true}),
+        },
+      },
+    },
+  })
+  async find(
+    @param.filter(ResourceType) filter?: Filter<ResourceType>,
+  ): Promise<ResourceType[]> {
+    console.log("All Resource are fetched..");
+    return this.resourceTypeService.resourceTypeGet(filter)
+  }
+
+
+  //......................ResourceGetById......................................................................
+
+  @get('/resource-types/{id}')
+  @response(200, {
+    description: 'ResourceType model instance',
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(ResourceType, {includeRelations: true}),
+      },
+    },
+  })
+  async findById(
+    @param.path.string('id') id: string,
+    @param.filter(ResourceType, {exclude: 'where'}) filter?: FilterExcludingWhere<ResourceType>
+  ): Promise<ResourceType> {
+    return this.resourceTypeRepository.findById(id, filter);
+  }
+
+
+
+
+
+  //.........................................Post_ResourceType..................................................
 
   @post('/resource-types')
   @response(200, {
@@ -50,37 +120,20 @@ export class ResourceTypeController {
     })
     resourceType: Omit<ResourceType, 'id'>,
   ): Promise<ResourceType> {
-    return this.resourceTypeRepository.create(resourceType);
+    return this.resourceTypeService.resourceTypePost(resourceType);
   }
-
-  @get('/resource-types/count')
-  @response(200, {
-    description: 'ResourceType model count',
-    content: {'application/json': {schema: CountSchema}},
+  // ..........................................resourceType PutMethod...........................................
+  @put('/resource-types/{id}')
+  @response(204, {
+    description: 'ResourceType PUT success',
   })
-  async count(
-    @param.where(ResourceType) where?: Where<ResourceType>,
-  ): Promise<Count> {
-    return this.resourceTypeRepository.count(where);
+  async replaceById(
+    @param.path.string('id') id: string,
+    @requestBody() resourceType: ResourceType,
+  ): Promise<void> {
+    await this.resourceTypeService.resourceTypePutById(id, resourceType);
   }
-
-  @get('/resource-types')
-  @response(200, {
-    description: 'Array of ResourceType model instances',
-    content: {
-      'application/json': {
-        schema: {
-          type: 'array',
-          items: getModelSchemaRef(ResourceType, {includeRelations: true}),
-        },
-      },
-    },
-  })
-  async find(
-    @param.filter(ResourceType) filter?: Filter<ResourceType>,
-  ): Promise<ResourceType[]> {
-    return this.resourceTypeRepository.find(filter);
-  }
+  // ..........................................resourceType PatchMethod...........................................
 
   @patch('/resource-types')
   @response(200, {
@@ -98,24 +151,10 @@ export class ResourceTypeController {
     resourceType: ResourceType,
     @param.where(ResourceType) where?: Where<ResourceType>,
   ): Promise<Count> {
-    return this.resourceTypeRepository.updateAll(resourceType, where);
+    return this.resourceTypeService.resourceTypePatch(resourceType, where);
   }
 
-  @get('/resource-types/{id}')
-  @response(200, {
-    description: 'ResourceType model instance',
-    content: {
-      'application/json': {
-        schema: getModelSchemaRef(ResourceType, {includeRelations: true}),
-      },
-    },
-  })
-  async findById(
-    @param.path.string('id') id: string,
-    @param.filter(ResourceType, {exclude: 'where'}) filter?: FilterExcludingWhere<ResourceType>
-  ): Promise<ResourceType> {
-    return this.resourceTypeRepository.findById(id, filter);
-  }
+  //............................................resourceTypePatchByIdMethod......................................
 
   @patch('/resource-types/{id}')
   @response(204, {
@@ -132,25 +171,17 @@ export class ResourceTypeController {
     })
     resourceType: ResourceType,
   ): Promise<void> {
-    await this.resourceTypeRepository.updateById(id, resourceType);
+    await this.resourceTypeService.resourceTypePatchById(resourceType, id);
   }
 
-  @put('/resource-types/{id}')
-  @response(204, {
-    description: 'ResourceType PUT success',
-  })
-  async replaceById(
-    @param.path.string('id') id: string,
-    @requestBody() resourceType: ResourceType,
-  ): Promise<void> {
-    await this.resourceTypeRepository.replaceById(id, resourceType);
-  }
+
+  // .....................................resourceTypeDeleteById...............................................
 
   @del('/resource-types/{id}')
   @response(204, {
     description: 'ResourceType DELETE success',
   })
   async deleteById(@param.path.string('id') id: string): Promise<void> {
-    await this.resourceTypeRepository.deleteById(id);
+    await this.resourceTypeService.resourceTypeDeleteById(id);
   }
 }

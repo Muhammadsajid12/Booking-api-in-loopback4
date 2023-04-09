@@ -3,35 +3,37 @@ import {
   CountSchema,
   Filter,
   FilterExcludingWhere,
-  repository,
-  Where,
+  Where
 } from '@loopback/repository';
+
+
 import {
   del,
   get,
   getModelSchemaRef,
   param,
   patch,
-  post,
-  put,
-  requestBody,
-  response,
+  post, put, requestBody,
+  response
 } from '@loopback/rest';
 import {Locations} from '../models';
-import {LocationsRepository} from '../repositories';
-
 // ---------- ADD IMPORTS -------------
 import {authenticate} from '@loopback/authentication';
-
+import {inject} from '@loopback/core';
+import {LocationService} from '../services';
 
 
 @authenticate('jwt') // <---- Apply the @authenticate decorator at the class level
 export class LocationsController {
   constructor(
-    @repository(LocationsRepository)
-    public locationsRepository: LocationsRepository,
+    @inject("services.LocationService") public locationSerivce: LocationService // Here carService injected..
   ) { }
 
+
+
+
+
+  // Here is the methods route..............................
   @post('/locations')
   @response(200, {
     description: 'Locations model instance',
@@ -50,20 +52,25 @@ export class LocationsController {
     })
     locations: Omit<Locations, 'id'>,
   ): Promise<Locations> {
-    return this.locationsRepository.create(locations);
+    return this.locationSerivce.createNewLocation(locations);
   }
 
+
+  // Count Locations..................
   @get('/locations/count')
   @response(200, {
     description: 'Locations model count',
     content: {'application/json': {schema: CountSchema}},
   })
   async count(
-    @param.where(Locations) where?: Where<Locations>,
+    @param.where(Locations) where?: Where<Locations>
   ): Promise<Count> {
-    return this.locationsRepository.count(where);
+    console.log('called');
+    return this.locationSerivce.locationCount(where);
   }
 
+
+  // Get all locations................................
   @get('/locations')
   @response(200, {
     description: 'Array of Locations model instances',
@@ -77,10 +84,13 @@ export class LocationsController {
     },
   })
   async find(
-    @param.filter(Locations) filter?: Filter<Locations>,
+    @param.filter(Locations) filter?: Filter<Locations>
   ): Promise<Locations[]> {
-    return this.locationsRepository.find(filter);
+    return this.locationSerivce.findLocations(filter);
   }
+
+
+  // Patch all locations.................................................
 
   @patch('/locations')
   @response(200, {
@@ -98,8 +108,10 @@ export class LocationsController {
     locations: Locations,
     @param.where(Locations) where?: Where<Locations>,
   ): Promise<Count> {
-    return this.locationsRepository.updateAll(locations, where);
+    return this.locationSerivce.patchAllLocations(locations, where);
   }
+
+  // Get location By Id.......................⚡⚡
 
   @get('/locations/{id}')
   @response(200, {
@@ -110,13 +122,17 @@ export class LocationsController {
       },
     },
   })
+
+  //
   async findById(
     @param.path.string('id') id: string,
     @param.filter(Locations, {exclude: 'where'}) filter?: FilterExcludingWhere<Locations>
   ): Promise<Locations> {
-    return this.locationsRepository.findById(id, filter);
+    return this.locationSerivce.findById(id, filter);
   }
 
+
+  // Patch locations ById...................................⚡⚡⚡
   @patch('/locations/{id}')
   @response(204, {
     description: 'Locations PATCH success',
@@ -132,9 +148,10 @@ export class LocationsController {
     })
     locations: Locations,
   ): Promise<void> {
-    await this.locationsRepository.updateById(id, locations);
+    await this.locationSerivce.loctionUpdatebyId(id, locations);
   }
 
+  // Put locations ById...............................⚡⚡⚡
   @put('/locations/{id}')
   @response(204, {
     description: 'Locations PUT success',
@@ -143,14 +160,18 @@ export class LocationsController {
     @param.path.string('id') id: string,
     @requestBody() locations: Locations,
   ): Promise<void> {
-    await this.locationsRepository.replaceById(id, locations);
+    await this.locationSerivce.putLocationById(id, locations);
   }
 
+
+  // Delete location ById............................⚡⚡⚡
   @del('/locations/{id}')
   @response(204, {
     description: 'Locations DELETE success',
   })
   async deleteById(@param.path.string('id') id: string): Promise<void> {
-    await this.locationsRepository.deleteById(id);
+    await this.locationSerivce.deleteLocations(id);
   }
+
+
 }

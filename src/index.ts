@@ -9,12 +9,14 @@ export async function main(options: ApplicationConfig = {}) {
 
   const url = app.restServer.url;
   console.log(`Server is running at ${url}`);
-  console.log(`Try ${url}/ping`);
+  console.log(`Try ${url}/explorer`);
 
   return app;
 }
 
+
 if (require.main === module) {
+
   // Run the application
   const config = {
     rest: {
@@ -32,8 +34,13 @@ if (require.main === module) {
       },
     },
   };
+
+  // Here are the catch block to catch the error.........................
+
   main(config).catch(err => {
     console.error('Cannot start the application.', err);
     process.exit(1);
   });
+
+
 }
