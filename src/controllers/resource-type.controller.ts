@@ -20,13 +20,13 @@ import {
 import {ResourceType} from '../models';
 import {ResourceTypeRepository} from '../repositories';
 // ---------- ADD IMPORTS -------------
-// import {authenticate} from '@loopback/authentication';
+import {authenticate} from '@loopback/authentication';
 import {inject} from '@loopback/core';
 import {ResourceTypeService} from '../services';
 
 
 
-// @authenticate('jwt') // <---- Apply the @authenticate decorator at the class level
+@authenticate('jwt') // <---- Apply the @authenticate decorator at the class level
 
 export class ResourceTypeController {
   constructor(
