@@ -27,7 +27,6 @@ import {inject} from '@loopback/core';
 import {ResourceserviceService} from "../services/resource.service";
 
 
-@authenticate('jwt') // <---- Apply the @authenticate decorator at the class level
 
 export class ResourceController {
   constructor(
@@ -95,7 +94,7 @@ export class ResourceController {
 
   // ..............................................ResourcePost..................................................
 
-
+  @authenticate('jwt') // <---- Apply the @authenticate decorator at the class level
   @post('/resources')
   @response(200, {
     description: 'Resource model instance',
@@ -119,7 +118,7 @@ export class ResourceController {
 
   // .............................................ResourcePut................................................
 
-
+  @authenticate('jwt') // <---- Apply the @authenticate decorator at the class level
   @put('/resources/{id}')
   @response(204, {
     description: 'Resource PUT success',
@@ -135,7 +134,7 @@ export class ResourceController {
 
 
   // .............................................ResourcePatch................................................
-
+  @authenticate('jwt') // <---- Apply the @authenticate decorator at the class level
   @patch('/resources')
   @response(200, {
     description: 'Resource PATCH success count',
@@ -156,7 +155,7 @@ export class ResourceController {
   }
 
   // .............................................ResourcePatchById..........................................
-
+  @authenticate('jwt') // <---- Apply the @authenticate decorator at the class level
   @patch('/resources/{id}')
   @response(204, {
     description: 'Resource PATCH success',
@@ -177,7 +176,7 @@ export class ResourceController {
 
 
   // .............................................ResourcePatchById..........................................
-
+  @authenticate('jwt') // <---- Apply the @authenticate decorator at the class level
   @del('/resources/{id}')
   @response(204, {
     description: 'Resource DELETE success',

@@ -23,7 +23,8 @@ import {inject} from '@loopback/core';
 import {LocationService} from '../services';
 
 
-@authenticate('jwt') // <---- Apply the @authenticate decorator at the class level
+
+
 export class LocationsController {
   constructor(
     @inject("services.LocationService") public locationSerivce: LocationService // Here carService injected..
@@ -32,13 +33,14 @@ export class LocationsController {
 
 
 
-
+  @authenticate('jwt') // <---- Apply the @authenticate decorator at the class level
   // Here is the methods route..............................
   @post('/locations')
   @response(200, {
     description: 'Locations model instance',
     content: {'application/json': {schema: getModelSchemaRef(Locations)}},
   })
+
   async create(
     @requestBody({
       content: {
@@ -50,7 +52,7 @@ export class LocationsController {
         },
       },
     })
-    locations: Omit<Locations, 'id'>,
+    locations: Locations,
   ): Promise<Locations> {
     return this.locationSerivce.createNewLocation(locations);
   }
@@ -90,8 +92,9 @@ export class LocationsController {
   }
 
 
-  // Patch all locations.................................................
 
+  @authenticate('jwt') // <---- Apply the @authenticate decorator at the class level
+  // Patch all locations.................................................
   @patch('/locations')
   @response(200, {
     description: 'Locations PATCH success count',
@@ -111,8 +114,9 @@ export class LocationsController {
     return this.locationSerivce.patchAllLocations(locations, where);
   }
 
-  // Get location By Id.......................⚡⚡
 
+
+  // Get location By Id.......................⚡⚡
   @get('/locations/{id}')
   @response(200, {
     description: 'Locations model instance',
@@ -132,6 +136,9 @@ export class LocationsController {
   }
 
 
+
+
+  @authenticate('jwt') // <---- Apply the @authenticate decorator at the class level
   // Patch locations ById...................................⚡⚡⚡
   @patch('/locations/{id}')
   @response(204, {
@@ -151,6 +158,8 @@ export class LocationsController {
     await this.locationSerivce.loctionUpdatebyId(id, locations);
   }
 
+
+  @authenticate('jwt') // <---- Apply the @authenticate decorator at the class level
   // Put locations ById...............................⚡⚡⚡
   @put('/locations/{id}')
   @response(204, {
@@ -163,7 +172,7 @@ export class LocationsController {
     await this.locationSerivce.putLocationById(id, locations);
   }
 
-
+  @authenticate('jwt') // <---- Apply the @authenticate decorator at the class level
   // Delete location ById............................⚡⚡⚡
   @del('/locations/{id}')
   @response(204, {

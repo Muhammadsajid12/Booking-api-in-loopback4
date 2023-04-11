@@ -7,6 +7,8 @@ import {Locations} from '../models';
 import {LocationsRepository} from '../repositories';
 
 @injectable({scope: BindingScope.TRANSIENT})
+
+
 export class LocationService {
   constructor(
 

@@ -20,13 +20,12 @@ import {
 import {ResourceType} from '../models';
 import {ResourceTypeRepository} from '../repositories';
 // ---------- ADD IMPORTS -------------
-// import {authenticate} from '@loopback/authentication';
+import {authenticate} from '@loopback/authentication';
 import {inject} from '@loopback/core';
 import {ResourceTypeService} from '../services';
 
 
 
-// @authenticate('jwt') // <---- Apply the @authenticate decorator at the class level
 
 export class ResourceTypeController {
   constructor(
@@ -101,7 +100,7 @@ export class ResourceTypeController {
 
 
   //.........................................Post_ResourceType..................................................
-
+  @authenticate('jwt') // <---- Apply the @authenticate decorator at the class level
   @post('/resource-types')
   @response(200, {
     description: 'ResourceType model instance',
@@ -123,6 +122,7 @@ export class ResourceTypeController {
     return this.resourceTypeService.resourceTypePost(resourceType);
   }
   // ..........................................resourceType PutMethod...........................................
+  @authenticate('jwt') // <---- Apply the @authenticate decorator at the class level
   @put('/resource-types/{id}')
   @response(204, {
     description: 'ResourceType PUT success',
@@ -134,7 +134,7 @@ export class ResourceTypeController {
     await this.resourceTypeService.resourceTypePutById(id, resourceType);
   }
   // ..........................................resourceType PatchMethod...........................................
-
+  @authenticate('jwt') // <---- Apply the @authenticate decorator at the class level
   @patch('/resource-types')
   @response(200, {
     description: 'ResourceType PATCH success count',
@@ -155,7 +155,7 @@ export class ResourceTypeController {
   }
 
   //............................................resourceTypePatchByIdMethod......................................
-
+  @authenticate('jwt') // <---- Apply the @authenticate decorator at the class level
   @patch('/resource-types/{id}')
   @response(204, {
     description: 'ResourceType PATCH success',
@@ -176,7 +176,7 @@ export class ResourceTypeController {
 
 
   // .....................................resourceTypeDeleteById...............................................
-
+  @authenticate('jwt') // <---- Apply the @authenticate decorator at the class level
   @del('/resource-types/{id}')
   @response(204, {
     description: 'ResourceType DELETE success',
