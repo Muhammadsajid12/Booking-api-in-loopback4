@@ -12,6 +12,7 @@ import {
   UserRepository,
   UserServiceBindings
 } from '@loopback/authentication-jwt';
+
 import {inject} from '@loopback/core';
 import {model, property, repository} from '@loopback/repository';
 import {
@@ -35,22 +36,49 @@ export class NewUserRequest extends User {
     required: true,
   })
   password: string;
+
+  @property({
+    type: 'string',
+    required: true,
+  })
+  fullName: string;
+
+  @property({
+    type: 'number',
+    required: true,
+  })
+  phone: number;
+
 }
 
+// Here req.body authentication added........
 const CredentialsSchema: SchemaObject = {
   type: 'object',
-  required: ['email', 'password'],
+  required: ['email', 'password', 'fullName', 'phone'],
   properties: {
     email: {
       type: 'string',
       format: 'email',
     },
+
+    fullName: {
+      type: 'string',
+    },
+
     password: {
       type: 'string',
       minLength: 8,
     },
+
+    phone: {
+      type: 'number',
+      minLength: 8,
+    },
+
+
   },
 };
+
 
 export const CredentialsRequestBody = {
   description: 'The input of login function',
@@ -59,6 +87,8 @@ export const CredentialsRequestBody = {
     'application/json': {schema: CredentialsSchema},
   },
 };
+
+
 
 //  Here is controller...........
 export class UserController {
@@ -71,6 +101,7 @@ export class UserController {
     public user: UserProfile,
     @repository(UserRepository) protected userRepository: UserRepository,
   ) { }
+
 
   @post('/users/login', {
     responses: {
@@ -104,6 +135,9 @@ export class UserController {
     return {token};
   }
 
+
+
+
   @authenticate('jwt')
   @get('/whoAmI', {
     responses: {
@@ -119,12 +153,17 @@ export class UserController {
       },
     },
   })
+
+
   async whoAmI(
     @inject(SecurityBindings.USER)
     currentUserProfile: UserProfile,
   ): Promise<string> {
     return currentUserProfile[securityId];
   }
+
+
+  // Signup.....................
 
   @post('/signup', {
     responses: {
@@ -140,6 +179,8 @@ export class UserController {
       },
     },
   })
+
+
   async signUp(
     @requestBody({
       content: {
